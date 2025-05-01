@@ -1,21 +1,25 @@
+import os
 from openai import OpenAI
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_key = os.getenv("API_KEY")
+base_url = os.getenv("BASE_URL")
+model = os.getenv("MODEL")
 
 client = OpenAI(
-    api_key="sk-dd557453093d48aea7429b5f094197ad",
-    base_url="https://api.deepseek.com"
+    api_key=api_key,
+    base_url=base_url
 )
 
-def deepseek(model="deepseek-chat", max_tokens=1000, temperature=0.7, message=None):
+def deepseek(max_tokens=1000, temperature=0.7, message=None):
     try:
         if message is None or message == "":
             raise Exception("Message is required")
-        if model is None or model == "" or (model != "deepseek-chat" and model != "deepseek-reasoner"):
-            raise Exception("Invalid model")
         
         response = client.chat.completions.create(
-            # deepseek-chat: DeepSeek-V3
-            # deepseek-reasoner: DeepSeek-R1
             model=model,
             messages=[
                 {"role": "user", "content": message}
