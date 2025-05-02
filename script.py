@@ -14,32 +14,41 @@ client = OpenAI(
     base_url=base_url
 )
 
-def deepseek(max_tokens=1000, temperature=0.7, message=None):
+def chat(temperature=0.7, message=None):
     try:
         if message is None or message == "":
             raise Exception("Message is required")
         
         response = client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "user", "content": message}
-            ],
-            max_tokens=max_tokens,
+            messages=[{"role": "user", "content": message}],
             temperature=temperature
         )
         
         return response.choices[0].message.content
     except Exception as e:
-        error = json.loads(str(e).split(" - ")[1].replace("'", "\"").replace("None", "null"))
-        error['error']['code'] = str(e).split(" - ")[0].split(": ")[1]
-        error['error']['message'] = error['error']['message']
-        error['error'].pop('param')
-        error['error'].pop('type')
-        return json.dumps(error['error'], indent=2)
+        try:
+            error = json.loads(str(e).split(" - ")[1].replace("'", "\"").replace("None", "null"))
+            error['error']['code'] = str(e).split(" - ")[0].split(": ")[1]
+            error['error']['message'] = error['error']['message']
+            error['error'].pop('param')
+            error['error'].pop('type')
+            return json.dumps(error['error'], indent=2)
+        except Exception as e:
+            return str(e)
 
 def main():
-    call = deepseek(message="Cuál es la fecha de hoy?")
-    print(call)
+    instructions = [
+        'Solo dime el resultado de la solicitud, no hagas preguntas al usuario',
+    ]
+    instructions = "Estas son las instrucciones: " + ". ".join(instructions) + ". Esta es la solicitud formal: "
+    
+    message = "Dime que fecha es hoy"
+    message = instructions + message
+    
+    response = chat(message=message)
+    
+    print(response)
     
 if __name__ == "__main__":
     main()
